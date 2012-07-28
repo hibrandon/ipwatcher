@@ -19,10 +19,13 @@ class EmailAfterExecGui:
         self.port = ""
         self.server = ""
         self.toAddresses = ""
+        #make this a global import
+        self.propertiesDir = r'../conf'
+        self.fileProperties = self.propertiesDir + r"/" + 'properties.conf'
         
         try:
             parser = SafeConfigParser()
-            parser.read('properties.conf')
+            parser.read(self.fileProperties)
             
             self.fromAddress = parser.get('email', 'from')
             self.port = parser.get('email', 'port')
@@ -107,7 +110,7 @@ class EmailAfterExecGui:
              
             email = EmailWrapper(self.toAddresses,subject,text, self.fromAddress, self.password)
             email.mail()
-            tkMessageBox.showinfo()
+            tkMessageBox.showinfo("Execution Complete", subject)
             
         except Exception as inst:
             output = "ERROR GENERATED:\n"
