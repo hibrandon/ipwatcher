@@ -111,9 +111,7 @@ class WatchIP:
             self.prevHostName = self.curHostName
           
             
-        return self.hasChanged
-    
-        
+        return self.hasChanged      
         
 if __name__ == "__main__":
     watch = WatchIP()
