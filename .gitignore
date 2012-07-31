@@ -1,5 +1,5 @@
 *.pyc
 .project
 .pydevproject
-.properties
+.properties*
 conf/properties.conf
