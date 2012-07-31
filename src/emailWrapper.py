@@ -74,6 +74,19 @@ class EmailWrapper:
         
         finally:
             mailServer.close()
+            
+    def toString(self):
+        objStr = ""
+        objStr += "TO:" + self.to + "\n"
+        objStr += "SUBJECT:" + self.subject + "\n"
+        objStr += "TEXT:" + self.text + "\n"
+        objStr += "FROM:" + self.fromAddress + "\n"
+        objStr += "SERVER:" + self.server + "\n"
+        objStr += "PORT:" + str(self.port) + "\n"
+        objStr += "hasErrors:" + str(self.hasErrors) + "\n"
+        
+        return objStr
+
 
 if __name__ == "__main__":
     
