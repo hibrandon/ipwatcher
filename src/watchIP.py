@@ -24,7 +24,7 @@ from getIP import GetIP
 class WatchIP:
     def __init__(self):
         #make this a global import
-        self.properties = '.properties'
+        self.properties = '.ip_properties'
         self.prevHostName = ""
         self.prevInternalIp = ""
         self.prevExternalIp = ""
@@ -71,7 +71,7 @@ class WatchIP:
         self.curHostName = ips.host
         self.user = ips.user
         
-    def updateProperties(self,parser, key, val, section='node', propFile='.properties'):
+    def updateProperties(self,parser, key, val, section='node', propFile='.ip_properties'):
         try:
             parser.set(section, key, val)
             
