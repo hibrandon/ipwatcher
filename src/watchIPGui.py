@@ -176,7 +176,6 @@ class WatchIpGui:
     def showPrefs(self): 
         self.emailConfig.display(self)
         self.top.withdraw()
-        print "Withdrew the main frame"
         
     
     def helpButton(self):
