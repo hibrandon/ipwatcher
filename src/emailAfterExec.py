@@ -37,10 +37,11 @@ class EmailAfterExecGui():
         self.master = master
         self.title = title
         self.newWindow = True 
+        self.preExec = False
         
         self.emailConfig = EmailConfigGui(master, False)
         
-        if self.emailConfig.checkMissingConfig() == True:
+        if self.emailConfig.initialMissingConfigCheck() == True:
             message = "This is either the first time you have run this program "
             message += "or you are missing some required configuration"
             
@@ -63,6 +64,7 @@ class EmailAfterExecGui():
         
     def submit(self):
         text = 'COMMAND RESULTS:\n'
+        self.preExec = True
         
         
         if self.emailConfig.checkMissingConfig() == True: 
@@ -77,37 +79,42 @@ class EmailAfterExecGui():
             self.showPrefs()
             
         else:
-        
-            try:
-                self.pathToExe = self.ePath.get().strip()
-                self.args = self.eArgs.get()
-                text += self.captureOutput(self.pathToExe)
+            if self.startExecution == True:
+                msg = 'Shall I minimize the window and execute ' + self.pathToExe + ' now?'
+                if tkMessageBox.askokcancel('Execute Confirmation', msg):
+                    self.mainFrame.iconify()
+                    try:
+                        self.pathToExe = self.ePath.get().strip()
+                        self.args = self.eArgs.get()
+                        text += self.captureOutput(self.pathToExe)
+                        
+                        
+                        subject = self.pathToExe + " <-- Command completed"
+                        
+                        emObj = self.emailConfig
+                         
+                        email = EmailWrapper(emObj.recipients.get(),subject,text, emObj.fromAddress.get(), emObj.password.get())
+                        
+                        email.mail()
+                        
+                        if email.hasErrors == True:
+                            msg = email.errString
+                            msg += "\nValues: \n"
+                            msg +=  email.toString()
+                            tkMessageBox.showerror('Mail Error Generated', msg)
+                            self.mainFrame.deiconify()
+                            
+                        else:
+                            tkMessageBox.showinfo("Execution Complete", subject)
+                            self.mainFrame.deiconify()
+                        
+                    except Exception as inst:
+                        output = "ERROR GENERATED in EmailAfterExec.submit:\n"
+                        output += "Exception Type: " + str(type(inst)) + "\n"
+                        output += "Exception: " + str(inst) + "\n" 
+                        tkMessageBox.showerror('Submit Error Generated', output)
+                        self.mainFrame.deiconify()
                 
-                
-                subject = self.pathToExe + " <-- Command completed"
-                
-                emObj = self.emailConfig
-                 
-                email = EmailWrapper(emObj.recipients.get(),subject,text, emObj.fromAddress.get(), emObj.password.get())
-                
-                email.mail()
-                
-                if email.hasErrors == True:
-                    msg = email.errString
-                    msg += "\nValues: \n"
-                    msg +=  email.toString()
-                    tkMessageBox.showerror('Mail Error Generated', msg)
-                    
-                else:
-                    tkMessageBox.showinfo("Execution Complete", subject)
-                
-            except Exception as inst:
-                output = "ERROR GENERATED in EmailAfterExec.submit:\n"
-                output += "Exception Type: " + str(type(inst)) + "\n"
-                output += "Exception: " + str(inst) + "\n" 
-                print output
-            
-            os.sys.exit(0)
         
         
         
@@ -132,15 +139,20 @@ class EmailAfterExecGui():
         return str(output) 
     
     def showPrefs(self): 
-        self.emailConfig.display(self)
+        self.emailConfig.display(self,self.preExec)
         self.mainFrame.withdraw()
-        print "Withdrew the main frame"
+
     
-    def display(self): 
+    def display(self, startExecution=False):
+        self.startExecution = startExecution
+         
         if self.newWindow == False:
             self.mainFrame.update()
             self.mainFrame.deiconify()
-            print "I called update"
+            
+            if self.startExecution == True:
+                self.submit()
+
         
         else:
             ## Menu Bar

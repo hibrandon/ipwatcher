@@ -38,6 +38,7 @@ class WatchIpGui:
         self.vInternalIp = StringVar()
         self.vExternalIp = StringVar()
         self.vHostname   = StringVar()
+        self.isStarted = False
         
         
         self.display()
@@ -52,7 +53,7 @@ class WatchIpGui:
         ## Menu Bar
         
         filemenu = Menu(self.menubar, tearoff=0)
-        filemenu.add_command(label="Execute", command=self.start)
+        filemenu.add_command(label="Execute", command=self.action)
 
         filemenu.add_separator()
 
@@ -161,7 +162,8 @@ class WatchIpGui:
         
         curRow += 1      
         Button(self.top, text='Quit',bg='blue', fg='white', command=self.quit).grid(row=curRow,column=0, pady=5)
-        Button(self.top, text='Start',bg='blue', fg='white', command=self.start).grid(row=curRow,column=1, pady=5)
+        self.actionButton =Button(self.top, text='Start',bg='blue', fg='white', command=self.action)
+        self.actionButton.grid(row=curRow,column=1, pady=5)
         
         self.updateEntries()
         
@@ -188,8 +190,31 @@ class WatchIpGui:
         tkMessageBox.showinfo("Cheers", "Have a good one :) " )
         os.sys.exit(0)
         
-    def start(self):
-        pass
+    def action(self):
+        
+        if not self.isStarted:
+            
+            if self.emailConfig.checkMissingConfig() == True: 
+                msg = "Please configure the outgoing email."
+                tkMessageBox.showinfo('Configure Email', msg)
+                self.showPrefs()
+            
+                   
+            elif self.emailConfig.password.get() == "":
+                msg = "Enter your password, hit apply and then Start"
+                tkMessageBox.showinfo('Authenticate', msg)
+                self.showPrefs()
+                
+            else:
+                self.isStarted = not self.isStarted
+                print "Started"
+                self.actionButton.config(text='Stop')
+
+        else:
+            self.actionButton.config(text='Start')
+            self.isStarted = not self.isStarted
+            
+            
         
     def updateInterval(self, event=None):
         if self.unitSelection.get() == self.optionList[0]:

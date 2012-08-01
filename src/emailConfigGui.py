@@ -55,7 +55,7 @@ class EmailConfigGui():
         self.newWindow = True
         
         
-        
+        #TODO:  Create the properties file if it doesn't exist
         try:
             self.propFromAddress = self.parser.get('email', 'from')
             self.propPort = self.parser.get('email', 'port')
@@ -99,8 +99,10 @@ class EmailConfigGui():
         else:
             self.running = False
             if self.parentWindow != None:
-                self.parentWindow.display()
-            self.mainFrame.withdraw()
+                self.mainFrame.withdraw()
+                self.parentWindow.display(self.preExecution)
+             
+            
             
     def updateProperties(self,parser, key, val, section='email', propFile='.properties'):
         
@@ -115,8 +117,29 @@ class EmailConfigGui():
             output += "Exception Type: " + str(type(inst)) + "\n"
             output += "Exception: " + str(inst) + "\n"
             print output
+       
+    def initialMissingConfigCheck(self):
+        self.hasMissingConfig = False
+            
+        if self.propFromAddress =="":
+            self.hasMissingConfig = True
+            
+        if self.propPort == "":
+            self.hasMissingConfig = True
+            
+        if self.propServer == "":
+            self.hasMissingConfig = True
         
+        if self.propRecipients == "":
+            self.hasMissingConfig = True
+            
+        return self.hasMissingConfig
+    
+         
     def checkMissingConfig(self):
+        """
+        Initially display is not called so the property variables must also be checked
+        """
         self.hasMissingConfig = False
             
         if self.fromAddress.get() == "":
@@ -133,7 +156,9 @@ class EmailConfigGui():
             
         return self.hasMissingConfig
             
-    def display(self, parentWindow=None):
+    def display(self, parentWindow=None, preExecution=False):
+        self.preExecution = preExecution
+        
         if self.newWindow == False:
             self.mainFrame.update()
             self.mainFrame.deiconify()
