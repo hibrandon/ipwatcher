@@ -71,7 +71,7 @@ class EmailAfterExecGui():
             self.showPrefs()
             
                    
-        elif self.emailConfig.password == "":
+        elif self.emailConfig.password.get() == "":
             msg = "Enter your password, hit apply and then resubmit"
             tkMessageBox.showinfo('Authenticate', msg)
             self.showPrefs()
@@ -81,7 +81,6 @@ class EmailAfterExecGui():
             try:
                 self.pathToExe = self.ePath.get().strip()
                 self.args = self.eArgs.get()
-                print self.pathToExe
                 text += self.captureOutput(self.pathToExe)
                 
                 
@@ -89,19 +88,21 @@ class EmailAfterExecGui():
                 
                 emObj = self.emailConfig
                  
-                email = EmailWrapper(emObj.recipients,subject,text, emObj.fromAddress, emObj.password)
+                email = EmailWrapper(emObj.recipients.get(),subject,text, emObj.fromAddress.get(), emObj.password.get())
                 
                 email.mail()
                 
                 if email.hasErrors == True:
-                    print email.errString
-                    print "Values: "
-                    print email.toString()
+                    msg = email.errString
+                    msg += "\nValues: \n"
+                    msg +=  email.toString()
+                    tkMessageBox.showerror('Mail Error Generated', msg)
                     
-                tkMessageBox.showinfo("Execution Complete", subject)
+                else:
+                    tkMessageBox.showinfo("Execution Complete", subject)
                 
             except Exception as inst:
-                output = "ERROR GENERATED:\n"
+                output = "ERROR GENERATED in EmailAfterExec.submit:\n"
                 output += "Exception Type: " + str(type(inst)) + "\n"
                 output += "Exception: " + str(inst) + "\n" 
                 print output

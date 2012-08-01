@@ -17,10 +17,12 @@
 
 import os
 import tkMessageBox
+from Tkinter import *
 
 from watchIP import WatchIP
+from emailConfigGui import EmailConfigGui
 
-from Tkinter import *
+
 
 class WatchIpGui:
     def __init__(self, master, title='IP Watchdog'):
@@ -39,6 +41,8 @@ class WatchIpGui:
         
         
         self.display()
+        
+        self.emailConfig = EmailConfigGui(master, False)
         
         
     def display(self):
@@ -67,30 +71,6 @@ class WatchIpGui:
         self.menubar.add_cascade(label="Help", menu=helpmenu)
         self.master.config(menu=self.menubar)
         ## End Menu Bar
-
-#        self.casmenu = Menu(self.menubar)
-#        self.casmenu.choices = Menu(self.casmenu)
-#        self.casmenu.choices.wierdones = Menu(self.casmenu.choices)
-#        self.casmenu.choices.wierdones.add_command(label='A')
-#        self.casmenu.choices.wierdones.add_command(label='B')
-#        self.casmenu.choices.wierdones.add_command(label='C')
-#        self.casmenu.choices.wierdones.add_command(label='D')    
-#        
-#        self.casmenu.choices.add_command(label='A')
-#        self.casmenu.choices.add_command(label='B')
-#        self.casmenu.choices.add_command(label='C')
-#        self.casmenu.choices.add_command(label='D')
-#        self.casmenu.choices.add_command(label='E')
-#        self.casmenu.choices.add_command(label='F')
-#        self.casmenu.choices.add_cascade(label='G', 
-#                        menu=self.casmenu.choices.wierdones)
-#
-#        self.casmenu.add_cascade(label='email',
-#                                      menu=self.casmenu.choices)
-#
-#        self.unused = Menu(self.menubar)
-#        
-#        self.menubar.add_cascade(label="Preferences", menu=self.casmenu)
 
         self.top = Toplevel(menu=self.menubar, width=500, relief=RAISED,
                             borderwidth=2)
@@ -187,11 +167,17 @@ class WatchIpGui:
         
 
         #Grid End
+        
     def updateEntries(self):
         self.vInternalIp.set(self.watch.curInternalIp)
         self.vExternalIp.set(self.watch.curExternalIp)
         self.vHostname.set(self.watch.curHostName)
-        
+      
+    def showPrefs(self): 
+        self.emailConfig.display(self)
+        self.mainFrame.withdraw()
+        print "Withdrew the main frame"
+          
     def showPrefs(self):
         pass
     
