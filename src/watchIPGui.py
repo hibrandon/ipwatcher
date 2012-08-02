@@ -46,7 +46,7 @@ class WatchIpGui:
         self.emailConfig = EmailConfigGui(master, False)
         
         
-    def display(self):
+    def display(self, preExec=False):
         curRow = 0
 
 
