@@ -33,7 +33,7 @@ class WatchIP:
         self.user = ""
         self.hasChanged = False
         self.hostHasChanged = False
-        self.exteralIpHasChanged = False
+        self.externalIpHasChanged = False
         self.internalIpHasChanged = False
         self.initialRun = True
 
@@ -92,7 +92,7 @@ class WatchIP:
                 self.prevHostName = self.curHostName
                 self.prevInternalIp = self.prevInternalIp
                 self.prevExternalIp = self.prevExternalIp
-                self.initialRun == False
+                self.initialRun = False
                 
             
             
@@ -103,6 +103,14 @@ class WatchIP:
         self.curExternalIp = ips.externalIP.strip()
         self.curHostName = ips.host
         self.user = ips.user
+        
+    def getCurrentIpString(self):
+        curVals = "Current Values:\n" 
+        curVals += "Internal IP: " + self.curInternalIp + " \n"
+        curVals += "External IP: " + self.curExternalIp + " \n"
+        curVals += "Hostname: " + self.curHostName + " \n"
+        
+        return curVals
         
     def updateProperties(self,parser, properties, key, val, section='node'):
         try:
@@ -122,11 +130,11 @@ class WatchIP:
         #add error handling on properties update
         self.hasChanged = False
         self.internalIpHasChanged = False
-        self.exteralIpHasChanged = False
+        self.externalIpHasChanged = False
         self.hostHasChanged = False
         
         if self.curExternalIp != self.prevExternalIp:
-            self.exteralIpHasChanged = True
+            self.externalIpHasChanged = True
             self.hasChanged = True
             self.updateProperties(self.parser, self.properties, 'externalIp',self.curExternalIp)
             self.prevExternalIp = self.curExternalIp

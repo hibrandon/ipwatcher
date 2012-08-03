@@ -16,14 +16,14 @@
 
 
 import os
+import time
 import tkMessageBox
 from Tkinter import *
 
 from watchIP import WatchIP
 from emailConfigGui import EmailConfigGui
-
-
-
+import threading
+                
 class WatchIpGui:
     def __init__(self, master, title='IP Watchdog'):
         self.master = master
@@ -41,6 +41,8 @@ class WatchIpGui:
         self.isStarted = False
         self.newWindow = True
         self.preExec = False
+        self.scale = None
+        self.stop = True
         
         
         self.display()
@@ -56,7 +58,6 @@ class WatchIpGui:
         if self.newWindow == False:
             self.top.update()
             self.top.deiconify()
-            print "Start EXEC = ", self.startExecution
             
             if self.startExecution == True:
                 self.action()
@@ -234,9 +235,11 @@ class WatchIpGui:
                     if tkMessageBox.askokcancel('Execute Confirmation', msg):
                         self.isStarted = not self.isStarted
                         self.actionButton.config(text='Stop')
-                        self.top.iconify()
-                    
-                
+                        self.top.iconify()  
+                        
+#                        self.emailOnChange() 
+#                        self.top.deiconify()
+                        print "Done"       
 
         else:
             self.actionButton.config(text='Start')
@@ -252,11 +255,62 @@ class WatchIpGui:
             self.notifyList.append('Internal IP')
             
         if self.cbHostname.get():
-            self.notifyList.append('Hostname')   
+            self.notifyList.append('Hostname')  
+             
             
-    def checkForChanges(self):
-        pass    
+    def watchedValueHasChange(self):
+        notify = False
+        self.watch.updateOnChangeInIpOrHost()
+    
+        if self.cbExternalIp.get() == True:
+            if self.watch.externalIpHasChanged == True:
+                notify = True
                 
+        if self.cbInternalIp.get() == True:
+            if self.watch.internalIpHasChanged == True:
+                notify = True
+                
+        if self.cbHostname.get() == True:
+            if self.watch.hostHasChanged == True:
+                notify = True
+                
+        return notify
+    
+    def emailOnChange(self):
+        self.normalizeInterval()
+        print "Is Started: ", self.isStarted
+        
+        if self.scale != None:
+            
+            while self.isStarted == True:
+                
+                time.sleep(30)
+                if self.watchedValueHasChange() == True:
+                    tkMessageBox.showinfo("Change Detected", self.watch.getCurrentIpString())
+                    
+                else:
+                    tkMessageBox.showinfo("No Change Detected", self.watch.getCurrentIpString())
+                    print "Is Started: ", self.isStarted
+                
+        
+    
+    def normalizeInterval(self):
+        self.scale = self.scl.get()
+        if self.unitSelection.get() == 'minutes(s)':
+            self.scale = self.scale * 60
+            
+        elif self.unitSelection.get() == 'hour(s)':
+            self.scale = self.scale * 60  * 60
+        
+        elif self.unitSelection.get() == 'days(s)':
+            self.scale = self.scale * 24 * 60 * 60
+        else:
+            self.ErrStr = "Error:  Unknown unit --> " + str(self.unitSelection.get())
+            
+        print self.scale
+        self.scale = 120
+        
+        
         
     def updateInterval(self, event=None):
         if self.unitSelection.get() == self.optionList[0]:
@@ -272,13 +326,11 @@ class WatchIpGui:
             
         self.scl.config(from_=self.min)
         self.scl.config(to=self.max)
+    
 
-def main():
+if __name__ == '__main__':
     root = Tk()
     root.withdraw()
     app = WatchIpGui(root)
     root.mainloop()
-
-if __name__ == '__main__':
-    main()
 
