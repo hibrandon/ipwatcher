@@ -23,6 +23,34 @@ from Tkinter import *
 from watchIP import WatchIP
 from emailConfigGui import EmailConfigGui
 import threading
+
+
+class ExecuteWatchThread(threading.Thread):
+    def __init__(self, ):
+        self._stopEvent = threading.Event()
+        self.newCommandPoll = 5
+        threading.Thread.__init__(self, name="WatchIP")
+        
+    def run(self):
+        while not self._stopEvent.isSet():
+            pass
+            """Set the interval.
+            loop Subtracting newCommandPoll seconds from the interval
+            Check for stop event
+            Check for less than or equal to zero
+            when lte break inner loop
+            self._stopEvent.wait(self.newCommandPoll)
+            
+            Check for change in ip
+                if change email
+            """
+                
+                
+    def join(self, timeout=None):
+        print "And the thread goes away............."
+        self._stopEvent.set()
+        threading.Thread.join(self, timeout)
+        
                 
 class WatchIpGui:
     def __init__(self, master, title='IP Watchdog'):
