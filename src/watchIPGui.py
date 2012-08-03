@@ -43,7 +43,7 @@ class WatchIpGui:
         
         self.display()
         
-        self.emailConfig = EmailConfigGui(master, False)
+        self.emailConfig = EmailConfigGui(master, False, properties='.ipwatcher.email.properties')
         
         
     def display(self, preExec=False):
@@ -187,7 +187,7 @@ class WatchIpGui:
         pass
 
     def quit(self): 
-        tkMessageBox.showinfo("Cheers", "Have a good one :) " )
+        #tkMessageBox.showinfo("Cheers", "Have a good one :) " )
         os.sys.exit(0)
         
     def action(self):
@@ -198,7 +198,6 @@ class WatchIpGui:
                 msg = "Please configure the outgoing email."
                 tkMessageBox.showinfo('Configure Email', msg)
                 self.showPrefs()
-            
                    
             elif self.emailConfig.password.get() == "":
                 msg = "Enter your password, hit apply and then Start"
