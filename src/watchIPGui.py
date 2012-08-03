@@ -253,10 +253,10 @@ class WatchIpGui:
             self.notifyList.append('Internal IP')
             
         if self.cbHostname.get():
-            self.notifyList.append('Hostname') 
+            self.notifyList.append('Hostname')   
             
- 
-           
+    def checkForChanges(self):
+        pass    
                 
         
     def updateInterval(self, event=None):
