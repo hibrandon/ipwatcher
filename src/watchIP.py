@@ -36,10 +36,20 @@ class WatchIP:
         self.hostHasChanged = False
         self.exteralIpHasChanged = False
         self.internalIpHasChanged = False
+        self.initialRun = True
 
 
         self.parser = SafeConfigParser()
-        self.parser.read(self.properties)
+        try:
+            self.parser.read(self.properties)
+            
+        except Exception as inst:
+            output = "ERROR GENERATED PARSING: --> " + self.properties + " \n"
+            output += "Exception Type: " + str(type(inst)) + "\n"
+            output += "Exception: " + str(inst) + "\n"
+            print output
+            
+        
         
         self.getPreviousIP()
         self.getCurrentIP()
@@ -49,19 +59,29 @@ class WatchIP:
         
     
     def getPreviousIP(self):
-        try:
-            self.prevHostName = self.parser.get('node', 'hostName')
-            self.prevInternalIp = self.parser.get('node', 'internalIp')
-            self.prevExternalIp = self.parser.get('node', 'externalIp')
-
-            self.user = self.parser.get('node', 'user')
- 
-        except Exception as inst:
-            print 'Here'
-            output = "ERROR GENERATED:\n"
-            output += "Exception Type: " + str(type(inst)) + "\n"
-            output += "Exception: " + str(inst) + "\n"
-            print output
+        if os.path.isfile(self.properties):
+            try:
+                self.prevHostName = self.parser.get('node', 'hostName')
+                self.prevInternalIp = self.parser.get('node', 'internalIp')
+                self.prevExternalIp = self.parser.get('node', 'externalIp')
+    
+                self.user = self.parser.get('node', 'user')
+     
+            except Exception as inst:
+                output = "ERROR GENERATED IN getPreviousIP:\n"
+                output += "Exception Type: " + str(type(inst)) + "\n"
+                output += "Exception: " + str(inst) + "\n"
+                print output
+                
+        else:
+            if self.initialRun == True:
+                self.getCurrentIP()
+                self.prevHostName = self.curHostName
+                self.prevInternalIp = self.prevInternalIp
+                self.prevExternalIp = self.prevExternalIp
+                self.initialRun == False
+                
+            
             
             
     def getCurrentIP(self):

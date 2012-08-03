@@ -56,18 +56,22 @@ class EmailConfigGui():
         
         
         #TODO:  Create the properties file if it doesn't exist
-        try:
-            self.propFromAddress = self.parser.get('email', 'from')
-            self.propPort = self.parser.get('email', 'port')
-            self.propServer = self.parser.get('email', 'server')
-            self.propRecipients = self.parser.get('email', 'to')
-            self.propPassword = self.parser.get('email','pwd')
- 
-        except Exception as inst:
-            output = "ERROR GENERATED:\n"
-            output += "Exception Type: " + str(type(inst)) + "\n"
-            output += "Exception: " + str(inst) + "\n"
-            print output
+        
+        if os.path.isfile(self.properties):
+        
+            try:
+                self.propFromAddress = self.parser.get('email', 'from')
+                self.propPort = self.parser.get('email', 'port')
+                self.propServer = self.parser.get('email', 'server')
+                self.propRecipients = self.parser.get('email', 'to')
+                self.propPassword = self.parser.get('email','pwd')
+     
+            except Exception as inst:
+                output = "ERROR GENERATED:\n"
+                output += "Exception Type: " + str(type(inst)) + "\n"
+                output += "Exception: " + str(inst) + "\n"
+                print output
+            
             
             
         if display:

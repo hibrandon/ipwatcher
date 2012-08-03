@@ -39,6 +39,8 @@ class WatchIpGui:
         self.vExternalIp = StringVar()
         self.vHostname   = StringVar()
         self.isStarted = False
+        self.newWindow = True
+        self.preExec = False
         
         
         self.display()
@@ -46,129 +48,142 @@ class WatchIpGui:
         self.emailConfig = EmailConfigGui(master, False)
         
         
-    def display(self, preExec=False):
-        curRow = 0
-
-
-        ## Menu Bar
+    def display(self, startExecution=False):
         
-        filemenu = Menu(self.menubar, tearoff=0)
-        filemenu.add_command(label="Execute", command=self.action)
-
-        filemenu.add_separator()
-
-        filemenu.add_command(label="Exit", command=self.quit)
-        self.menubar.add_cascade(label="File", menu=filemenu)
-        editmenu = Menu(self.menubar, tearoff=0)
-
-        editmenu.add_separator()
-
-        editmenu.add_command(label="Preferences", command=self.showPrefs)
-
-        self.menubar.add_cascade(label="Edit", menu=editmenu)
-        helpmenu = Menu(self.menubar, tearoff=0)
-        helpmenu.add_command(label="Email After Execution Help", command=self.helpButton)
-        helpmenu.add_command(label="About...", command=self.showVersion)
-        self.menubar.add_cascade(label="Help", menu=helpmenu)
-        self.master.config(menu=self.menubar)
-        ## End Menu Bar
-
-        self.top = Toplevel(menu=self.menubar, width=500, relief=RAISED,
-                            borderwidth=2)
+        self.startExecution = startExecution
         
-        self.top.protocol("WM_DELETE_WINDOW",self.quit)
-
-        gridWidth = 30
-        px = 5
-        lWidth = 15
-        py = 18
-
-        #Grid Start
-
-        #Notify on Change
-        Label(self.top, text='Notify on Change in:',
-              relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow, column=0, columnspan=2, pady=py)
-
-        curRow += 1
+         
+        if self.newWindow == False:
+            self.top.update()
+            self.top.deiconify()
+            print "Start EXEC = ", self.startExecution
+            
+            if self.startExecution == True:
+                self.action()
         
-        Label(self.top, text='Internal IP', relief=RIDGE,  width=15).grid(row=curRow, column=0)
-        Checkbutton(self.top,variable=self.cbInternalIp).grid(row=curRow, column=1, sticky=W, padx=px)
-
-        curRow += 1
-        
-        Label(self.top, text='External IP', relief=RIDGE,  width=15).grid(row=curRow, column=0)
-        Checkbutton(self.top,variable=self.cbExternalIp).grid(row=curRow, column=1, sticky=W,padx=px)
-
-        curRow += 1
-        
-        Label(self.top, text='Hostname', relief=RIDGE,  width=15).grid(row=curRow, column=0)
-        Checkbutton(self.top,variable=self.cbHostname).grid(row=curRow, column=1, sticky=W,padx=px)
-
-
-        #Change Frequency
-        curRow += 1
-        Label(self.top, text='Poll Frequency:',
-              relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow,
-                                                              column=0, columnspan=2, pady=py)
-        curRow += 1     
-        Label(self.top, text='Units', relief=RIDGE,  width=15).grid(row=curRow, column=0)
-        self.optionList = ['minute(s)','hour(s)','day(s)']
-        self.unitSelection.set(self.optionList[0])
-        OptionMenu(self.top, self.unitSelection, *self.optionList, command=self.updateInterval).grid(row=curRow, column=1, stick=EW)
-        
-        self.min = 5.0
-        self.max = 60.0
-
-        curRow += 1
-        Label(self.top, text='Interval', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0,padx=px)
-        self.scl = Scale(self.top, from_=self.min, to=self.max, orient=HORIZONTAL)
-        self.scl.grid(row=curRow, column=1,padx=px)
-
-
-        #Current Values
-        curRow += 1
-        Label(self.top, text='Current Values:',
-              relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow,
-                                                              column=0, columnspan=2, pady=py)
-
-        
-        curRow += 1
-        Label(self.top, text='Internal IP', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0,padx=px)
-        self.eInternalIp = Entry(self.top,state='readonly', textvariable=self.vInternalIp)
-        self.eInternalIp.grid(row=curRow, column=1, sticky=W,padx=px)
-        
-        
-
-        curRow += 1
-        
-        Label(self.top, text='External IP', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0,padx=px)
-        self.eExternalIp = Entry(self.top,state='readonly', textvariable=self.vExternalIp)
-        self.eExternalIp.grid(row=curRow, column=1, sticky=W,padx=px)
-        #self.vExternalIp.set()
-
-        curRow += 1
-        
-        Label(self.top, text='Hostname', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0, padx=px)
-        self.eHostname = Entry(self.top,state='readonly', textvariable=self.vHostname)
-        self.eHostname.grid(row=curRow, column=1, sticky=W,padx=px)
-
-
-        #Actions
-        
-        curRow += 1
-        Label(self.top, text='Actions:',
-              relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow,
-                                                              column=0, columnspan=2, pady=py)
-        
-        curRow += 1      
-        Button(self.top, text='Quit',bg='blue', fg='white', command=self.quit).grid(row=curRow,column=0, pady=5)
-        self.actionButton =Button(self.top, text='Start',bg='blue', fg='white', command=self.action)
-        self.actionButton.grid(row=curRow,column=1, pady=5)
-        
-        self.updateEntries()
-        
-
-        #Grid End
+        else:
+            curRow = 0
+    
+    
+            ## Menu Bar
+            
+            filemenu = Menu(self.menubar, tearoff=0)
+            filemenu.add_command(label="Execute", command=self.action)
+    
+            filemenu.add_separator()
+    
+            filemenu.add_command(label="Exit", command=self.quit)
+            self.menubar.add_cascade(label="File", menu=filemenu)
+            editmenu = Menu(self.menubar, tearoff=0)
+    
+            editmenu.add_separator()
+    
+            editmenu.add_command(label="Preferences", command=self.showPrefs)
+    
+            self.menubar.add_cascade(label="Edit", menu=editmenu)
+            helpmenu = Menu(self.menubar, tearoff=0)
+            helpmenu.add_command(label="Email After Execution Help", command=self.helpButton)
+            helpmenu.add_command(label="About...", command=self.showVersion)
+            self.menubar.add_cascade(label="Help", menu=helpmenu)
+            self.master.config(menu=self.menubar)
+            ## End Menu Bar
+    
+            self.top = Toplevel(menu=self.menubar, width=500, relief=RAISED,
+                                borderwidth=2)
+            
+            self.top.protocol("WM_DELETE_WINDOW",self.quit)
+    
+            gridWidth = 30
+            px = 5
+            lWidth = 15
+            py = 18
+    
+            #Grid Start
+    
+            #Notify on Change
+            Label(self.top, text='Notify on Change in:',
+                  relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow, column=0, columnspan=2, pady=py)
+    
+            curRow += 1
+            
+            Label(self.top, text='Internal IP', relief=RIDGE,  width=15).grid(row=curRow, column=0)
+            Checkbutton(self.top,variable=self.cbInternalIp).grid(row=curRow, column=1, sticky=W, padx=px)
+    
+            curRow += 1
+            
+            Label(self.top, text='External IP', relief=RIDGE,  width=15).grid(row=curRow, column=0)
+            Checkbutton(self.top,variable=self.cbExternalIp).grid(row=curRow, column=1, sticky=W,padx=px)
+    
+            curRow += 1
+            
+            Label(self.top, text='Hostname', relief=RIDGE,  width=15).grid(row=curRow, column=0)
+            Checkbutton(self.top,variable=self.cbHostname).grid(row=curRow, column=1, sticky=W,padx=px)
+    
+    
+            #Change Frequency
+            curRow += 1
+            Label(self.top, text='Poll Frequency:',
+                  relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow,
+                                                                  column=0, columnspan=2, pady=py)
+            curRow += 1     
+            Label(self.top, text='Units', relief=RIDGE,  width=15).grid(row=curRow, column=0)
+            self.optionList = ['minute(s)','hour(s)','day(s)']
+            self.unitSelection.set(self.optionList[0])
+            OptionMenu(self.top, self.unitSelection, *self.optionList, command=self.updateInterval).grid(row=curRow, column=1, stick=EW)
+            
+            self.min = 5.0
+            self.max = 60.0
+    
+            curRow += 1
+            Label(self.top, text='Interval', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0,padx=px)
+            self.scl = Scale(self.top, from_=self.min, to=self.max, orient=HORIZONTAL)
+            self.scl.grid(row=curRow, column=1,padx=px)
+    
+    
+            #Current Values
+            curRow += 1
+            Label(self.top, text='Current Values:',
+                  relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow,
+                                                                  column=0, columnspan=2, pady=py)
+    
+            
+            curRow += 1
+            Label(self.top, text='Internal IP', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0,padx=px)
+            self.eInternalIp = Entry(self.top,state='readonly', textvariable=self.vInternalIp)
+            self.eInternalIp.grid(row=curRow, column=1, sticky=W,padx=px)
+            
+            
+    
+            curRow += 1
+            
+            Label(self.top, text='External IP', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0,padx=px)
+            self.eExternalIp = Entry(self.top,state='readonly', textvariable=self.vExternalIp)
+            self.eExternalIp.grid(row=curRow, column=1, sticky=W,padx=px)
+            #self.vExternalIp.set()
+    
+            curRow += 1
+            
+            Label(self.top, text='Hostname', relief=SUNKEN,  width=lWidth).grid(row=curRow, column=0, padx=px)
+            self.eHostname = Entry(self.top,state='readonly', textvariable=self.vHostname)
+            self.eHostname.grid(row=curRow, column=1, sticky=W,padx=px)
+    
+    
+            #Actions
+            
+            curRow += 1
+            Label(self.top, text='Actions:',
+                  relief=RIDGE, bg='gray',  width=gridWidth).grid(row=curRow,
+                                                                  column=0, columnspan=2, pady=py)
+            
+            curRow += 1      
+            Button(self.top, text='Quit',bg='blue', fg='white', command=self.quit).grid(row=curRow,column=0, pady=5)
+            self.actionButton =Button(self.top, text='Start',bg='blue', fg='white', command=self.action)
+            self.actionButton.grid(row=curRow,column=1, pady=5)
+            
+            self.updateEntries()
+            self.newWindow = False
+    
+            #Grid End
         
     def updateEntries(self):
         self.vInternalIp.set(self.watch.curInternalIp)
@@ -176,7 +191,7 @@ class WatchIpGui:
         self.vHostname.set(self.watch.curHostName)
       
     def showPrefs(self): 
-        self.emailConfig.display(self)
+        self.emailConfig.display(self, self.preExec)
         self.top.withdraw()
         
     
@@ -195,26 +210,54 @@ class WatchIpGui:
         if not self.isStarted:
             
             if self.emailConfig.checkMissingConfig() == True: 
+                self.preExec = True
                 msg = "Please configure the outgoing email."
                 tkMessageBox.showinfo('Configure Email', msg)
                 self.showPrefs()
             
                    
             elif self.emailConfig.password.get() == "":
+                self.preExec = True
                 msg = "Enter your password, hit apply and then Start"
                 tkMessageBox.showinfo('Authenticate', msg)
                 self.showPrefs()
                 
             else:
-                self.isStarted = not self.isStarted
-                print "Started"
-                self.actionButton.config(text='Stop')
+                self.getNotificationList()
+ 
+                if len(self.notifyList) == 0:
+                    tkMessageBox.showerror("Insufficient Input", "Please check an item to watch.")
+                    
+                else:
+                    msg = "I will minimize the window and then I will poll the system in " + str(self.scl.get()) + " " + self.unitSelection.get().replace('(s)','')
+                    msg += " intervals. Finally I will email/text on change in:\n\n" + '\n'.join(self.notifyList)
+                     
+                    if tkMessageBox.askokcancel('Execute Confirmation', msg):
+                        self.isStarted = not self.isStarted
+                        self.actionButton.config(text='Stop')
+                        self.top.iconify()
+                    
+                
 
         else:
             self.actionButton.config(text='Start')
             self.isStarted = not self.isStarted
             
+    def getNotificationList(self):
+        self.notifyList = []
+
+        if self.cbExternalIp.get():
+            self.notifyList.append('External IP')
             
+        if self.cbInternalIp.get():
+            self.notifyList.append('Internal IP')
+            
+        if self.cbHostname.get():
+            self.notifyList.append('Hostname') 
+            
+ 
+           
+                
         
     def updateInterval(self, event=None):
         if self.unitSelection.get() == self.optionList[0]:
