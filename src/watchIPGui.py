@@ -19,37 +19,76 @@ import os
 import time
 import tkMessageBox
 from Tkinter import *
+import threading
 
 from watchIP import WatchIP
 from emailConfigGui import EmailConfigGui
-import threading
+from emailWrapper import EmailWrapper
 
 
 class ExecuteWatchThread(threading.Thread):
-    def __init__(self, ):
+    def __init__(self, interval, fromAddress, password,recipients,
+                 watchInternalIP=True, watchExternalIP=True,
+                 watchHostname=True, server='smtp.gmail.com', port=587):
+        
         self._stopEvent = threading.Event()
         self.newCommandPoll = 5
+        self.interval = interval
+        self.fromAddress = fromAddress
+        self.password = password
+        self.recipients = recipients
+        self.server = server
+        self.port = port
+        self.watchInternalIP = watchInternalIP
+        self.watchExternalIP = watchExternalIP
+        self.watchHostname = watchHostname
+        
+        self.watch = WatchIP()
+        
         threading.Thread.__init__(self, name="WatchIP")
         
     def run(self):
+        print "Running the thread"
+        print "Interval == ", self.interval
+        
         while not self._stopEvent.isSet():
-            pass
-            """Set the interval.
-            loop Subtracting newCommandPoll seconds from the interval
-            Check for stop event
-            Check for less than or equal to zero
-            when lte break inner loop
-            self._stopEvent.wait(self.newCommandPoll)
+            remainingTime = 30 #self.interval
+            count = 0
+            while (remainingTime > 0) & (not self._stopEvent.isSet()) :
+                self._stopEvent.wait(self.newCommandPoll)
+                remainingTime -= self.newCommandPoll
+                print str(count) + "Listening for stop"
+                count += 1
+            print "End of an interval checking for change now"   
             
-            Check for change in ip
-                if change email
-            """
+            if self.watchedValueHasChanged():
+                print "Values have changed"
+                print self.watch.getCurrentIpString()
+
+    def watchedValueHasChanged(self):
+        notify = False
+        self.watch.updateOnChangeInIpOrHost()
+    
+        if self.watchExternalIP == True:
+            if self.watch.externalIpHasChanged == True:
+                notify = True
                 
+        if self.watchInternalIP  == True:
+            if self.watch.internalIpHasChanged == True:
+                notify = True
+                
+        if self.watchHostname == True:
+            if self.watch.hostHasChanged == True:
+                notify = True
+                
+        return notify       
                 
     def join(self, timeout=None):
         print "And the thread goes away............."
         self._stopEvent.set()
         threading.Thread.join(self, timeout)
+        
+    
         
                 
 class WatchIpGui:
@@ -263,7 +302,14 @@ class WatchIpGui:
                     if tkMessageBox.askokcancel('Execute Confirmation', msg):
                         self.isStarted = not self.isStarted
                         self.actionButton.config(text='Stop')
-                        self.top.iconify()  
+                        self.top.iconify() 
+                        
+                        self.normalizeInterval()
+                        em = self.emailConfig
+                        self.execWatchThread = ExecuteWatchThread(self.scale, em.fromAddress,em.password,em.recipients,
+                                                                   self.cbInternalIp.get(), self.cbExternalIp.get(),
+                                                                   self.cbHostname.get(), em.server, em.port)
+                        self.execWatchThread.start() 
                         
 #                        self.emailOnChange() 
 #                        self.top.deiconify()
@@ -272,6 +318,12 @@ class WatchIpGui:
         else:
             self.actionButton.config(text='Start')
             self.isStarted = not self.isStarted
+            if self.execWatchThread.isAlive():
+                self.execWatchThread.join()
+                
+            print "She is gone"
+            print "Libving? ", self.execWatchThread.isAlive()
+            
             
     def getNotificationList(self):
         self.notifyList = []
@@ -286,23 +338,7 @@ class WatchIpGui:
             self.notifyList.append('Hostname')  
              
             
-    def watchedValueHasChange(self):
-        notify = False
-        self.watch.updateOnChangeInIpOrHost()
     
-        if self.cbExternalIp.get() == True:
-            if self.watch.externalIpHasChanged == True:
-                notify = True
-                
-        if self.cbInternalIp.get() == True:
-            if self.watch.internalIpHasChanged == True:
-                notify = True
-                
-        if self.cbHostname.get() == True:
-            if self.watch.hostHasChanged == True:
-                notify = True
-                
-        return notify
     
     def emailOnChange(self):
         self.normalizeInterval()
