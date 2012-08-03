@@ -49,7 +49,6 @@ class EmailConfigGui():
         self.parser.read(self.properties)
         self.newWindow = True
         
-        
         # Create the properties file if it doesn't exist
         if os.path.exists(self.properties) == False:
             self.parser.add_section('email')
