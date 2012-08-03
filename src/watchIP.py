@@ -23,8 +23,7 @@ from getIP import GetIP
 
 class WatchIP:
     def __init__(self):
-        #make this a global import
-        self.properties = '.ip_properties'
+        self.properties = os.getenv("HOME") + os.sep + '.ipwatcher.properties'
         self.prevHostName = ""
         self.prevInternalIp = ""
         self.prevExternalIp = ""
@@ -51,11 +50,25 @@ class WatchIP:
             
         
         
+        # Create the properties file if it doesn't exist
+        if os.path.exists(self.properties) == False:
+            self.parser.add_section('node')
+            with file(self.properties, "w+") as fOut:
+                self.parser.write(fOut)
+        
         self.getPreviousIP()
         self.getCurrentIP()
         
-        self.updateProperties(self.parser, 'user', self.user)
+        self.updateProperties(self.parser, self.properties, 'user', self.user)
         
+        if self.prevInternalIp == "":
+            self.updateProperties(self.parser, self.properties, 'internalIp', self.curInternalIp)
+        
+        if self.prevExternalIp == "":
+            self.updateProperties(self.parser, self.properties, 'externalIp', self.curExternalIp)
+
+        if self.prevHostName == "":
+            self.updateProperties(self.parser, self.properties, 'hostName', self.curHostName)
         
     
     def getPreviousIP(self):
@@ -91,11 +104,11 @@ class WatchIP:
         self.curHostName = ips.host
         self.user = ips.user
         
-    def updateProperties(self,parser, key, val, section='node', propFile='.ip_properties'):
+    def updateProperties(self,parser, properties, key, val, section='node'):
         try:
             parser.set(section, key, val)
             
-            with open(propFile, 'w') as fOut:
+            with open(properties, 'w') as fOut:
                 parser.write(fOut)
                 
         except Exception as inst:
@@ -115,19 +128,19 @@ class WatchIP:
         if self.curExternalIp != self.prevExternalIp:
             self.exteralIpHasChanged = True
             self.hasChanged = True
-            self.updateProperties(self.parser, 'externalIp',self.curExternalIp)
+            self.updateProperties(self.parser, self.properties, 'externalIp',self.curExternalIp)
             self.prevExternalIp = self.curExternalIp
             
         if self.curInternalIp != self.prevInternalIp:
             self.internalIpHasChanged = True
             self.hasChanged = True
-            self.updateProperties(self.parser,'internalIp',self.curInternalIp)
+            self.updateProperties(self.parser,self.properties, 'internalIp',self.curInternalIp)
             self.prevInternalIp = self.curInternalIp
             
         if self.curHostName  != self.prevHostName:
             self.hostHasChanged = True
             self.hasChanged = True
-            self.updateProperties(self.parser, 'hostName',self.curHostName)
+            self.updateProperties(self.parser, self.properties, 'hostName',self.curHostName)
             self.prevHostName = self.curHostName
           
             

@@ -24,7 +24,7 @@ from emailWrapper import EmailWrapper
 
 
 class EmailConfigGui():
-    def __init__(self, master,display=True,isMain=False, title="Email Configuration"):
+    def __init__(self, master,display=True,isMain=False, title="Email Configuration", properties=".email.properties"):
         self.title = title
         self.master = master
         self.password = StringVar()
@@ -32,12 +32,6 @@ class EmailConfigGui():
         self.port = StringVar()
         self.server = StringVar()
         self.recipients = StringVar()
-        
-        self.propPassword = ""
-        self.propFromAddress = ""
-        self.propPort = ""
-        self.propServer = ""
-        self.propRecipients = ""
         
         self.tmpPassword = ''
         self.tmpFromAddress = ''
@@ -47,50 +41,57 @@ class EmailConfigGui():
         self.tmpSavePassword = ''
         
         
-        self.properties = '.properties'
+        self.properties = os.getenv("HOME") + os.sep + properties
+
         self.isMain = isMain
         self.isDisplayed = False
         self.parser = SafeConfigParser()
         self.parser.read(self.properties)
         self.newWindow = True
         
-        
-        #TODO:  Create the properties file if it doesn't exist
-        
-        if os.path.isfile(self.properties):
-        
-            try:
-                self.propFromAddress = self.parser.get('email', 'from')
-                self.propPort = self.parser.get('email', 'port')
-                self.propServer = self.parser.get('email', 'server')
-                self.propRecipients = self.parser.get('email', 'to')
-                self.propPassword = self.parser.get('email','pwd')
+        # Create the properties file if it doesn't exist
+        if os.path.exists(self.properties) == False:
+            self.parser.add_section('email')
+            with file(self.properties, "w+") as fOut:
+                self.parser.write(fOut)
+        else:    
+            self.fromAddress.set(self.readProp(self.parser, self.properties, 'from'))
+            self.port.set(self.readProp(self.parser, self.properties,'port'))
+            self.server.set(self.readProp(self.parser, self.properties, 'server'))
+            self.recipients.set(self.readProp(self.parser, self.properties, 'to'))
+            self.password.set(self.readProp(self.parser, self.properties,'password'))
      
-            except Exception as inst:
-                output = "ERROR GENERATED:\n"
-                output += "Exception Type: " + str(type(inst)) + "\n"
-                output += "Exception: " + str(inst) + "\n"
-                print output
-            
-            
+
+                
             
         if display:
             self.display()
+           
+    def readProp(self, parser, properties, key, section='email'):
+        val = ""
+        try:
+            val = self.parser.get(section, key)
+        except Exception as inst:
+            output = "ERROR GENERATED:\n"
+            output += "Exception Type: " + str(type(inst)) + "\n"
+            output += "Exception: " + str(inst) + "\n"
+            print output
             
+        return val
         
     def apply(self):
         
-        self.updateProperties(self.parser, 'from', self.fromAddress.get().strip())
-        self.updateProperties(self.parser, 'to',self.recipients.get().strip())
-        self.updateProperties(self.parser, 'port',self.port.get().strip())
-        self.updateProperties(self.parser, 'server',self.server.get().strip())
+        self.updateProperties(self.parser, self.properties, 'from', self.fromAddress.get().strip())
+        self.updateProperties(self.parser, self.properties, 'to',self.recipients.get().strip())
+        self.updateProperties(self.parser, self.properties, 'port',self.port.get().strip())
+        self.updateProperties(self.parser, self.properties, 'server',self.server.get().strip())
         
         if self.savePassword.get() == True:
             msg = "The password though obfuscated will be saved in an insecure manner."
             msg += "This is not recommended.  Are you sure you wish to do this?"
             if tkMessageBox.askyesno('Dangerous Action', msg ):
                 
-                self.updateProperties(self.parser, 'pwd', self.password.get().strip())
+                self.updateProperties(self.parser, 'password', self.password.get().strip())
 
         tkMessageBox.showinfo('Changes Applied', 'Your changes have been applied.')
         self.cancel()
@@ -98,7 +99,7 @@ class EmailConfigGui():
     
     def cancel(self): 
         if self.isMain == True:
-            tkMessageBox.showinfo("Cheers", "Have a good one :) " )
+            #tkMessageBox.showinfo("Cheers", "Have a good one :) " )
             os.sys.exit(0)
         else:
             self.running = False
@@ -108,12 +109,10 @@ class EmailConfigGui():
              
             
             
-    def updateProperties(self,parser, key, val, section='email', propFile='.properties'):
-        
+    def updateProperties(self,parser, properties, key, val, section='email'):
         try:
             parser.set(section, key, val)
-            
-            with open(propFile, 'w') as fOut:
+            with open(properties, 'w') as fOut:
                 parser.write(fOut)
                 
         except Exception as inst:
@@ -121,24 +120,6 @@ class EmailConfigGui():
             output += "Exception Type: " + str(type(inst)) + "\n"
             output += "Exception: " + str(inst) + "\n"
             print output
-       
-    def initialMissingConfigCheck(self):
-        self.hasMissingConfig = False
-            
-        if self.propFromAddress =="":
-            self.hasMissingConfig = True
-            
-        if self.propPort == "":
-            self.hasMissingConfig = True
-            
-        if self.propServer == "":
-            self.hasMissingConfig = True
-        
-        if self.propRecipients == "":
-            self.hasMissingConfig = True
-            
-        return self.hasMissingConfig
-    
          
     def checkMissingConfig(self):
         """
@@ -190,8 +171,6 @@ class EmailConfigGui():
             self.eFrom = Entry(self.mainFrame,width=eWidth, textvariable=self.fromAddress)
             self.eFrom.grid(row=curRow,column=1, pady=3, padx=5)
            
-            self.fromAddress.set(self.propFromAddress)
-
             
             curRow += 1 
             
@@ -199,7 +178,6 @@ class EmailConfigGui():
                                bd=2,relief=SOLID,width=lWidth).grid(row=curRow)
             self.eServer = Entry(self.mainFrame,width=eWidth, textvariable=self.server)
             self.eServer.grid(row=curRow,column=1, pady=3, padx=5)
-            self.server.set(self.propServer)
             
             
             curRow += 1 
@@ -207,7 +185,6 @@ class EmailConfigGui():
                                bd=2,relief=SOLID,width=lWidth).grid(row=curRow)
             self.ePort = Entry(self.mainFrame,width=eWidth, textvariable=self.port)
             self.ePort.grid(row=curRow,column=1, pady=3, padx=5)
-            self.port.set(self.propPort)
             
             
             curRow += 1 
@@ -215,14 +192,12 @@ class EmailConfigGui():
                                bd=2,relief=SOLID,width=lWidth).grid(row=curRow)
             self.eRecipients = Entry(self.mainFrame,width=eWidth, textvariable=self.recipients)
             self.eRecipients.grid(row=curRow,column=1, pady=3, padx=5)
-            self.recipients.set(self.propRecipients)
             
             curRow += 1 
             Label(self.mainFrame, text="Password",
                                bd=2,relief=SOLID,width=lWidth).grid(row=curRow)        
             self.ePassword = Entry(self.mainFrame,width=eWidth, textvariable=self.password, show='*')
             self.ePassword.grid(row=curRow,column=1, pady=3, padx=5)
-            self.password.set(self.propPassword)
             
             curRow += 1 
             Button(self.mainFrame, text='Test',bg='blue', fg='white', command=self.testConfiguration).grid(row=curRow,column=0, pady=5)

@@ -53,7 +53,7 @@ class EmailAfterExecGui():
         
        
     def cancel(self): 
-        tkMessageBox.showinfo("Cheers", "Have a good one :) " )
+        #tkMessageBox.showinfo("Cheers", "Have a good one :) " )
         os.sys.exit(0)
         
     def helpButton(self):
