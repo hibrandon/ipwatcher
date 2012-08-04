@@ -1,3 +1,5 @@
+# coding=<encoding utf-8>
+
 """
    Copyright 2012 Brandon Sutherlin, Mike Deats, and Ryan Neal
 
@@ -17,6 +19,7 @@
 import os
 import socket
 import getpass
+import urllib2
 
 ## ----------------------------------------------------------------------------
 ## captureOutput -  Wrapper function that captures the standard output of an
@@ -48,8 +51,9 @@ class GetIP:
        
     def getExternalIP(self):
         #Demo purposes switch this to whatsmyip.org or a php version on my site
-        cmd = r'curl -s icanhazip.com'
-        ip = self.captureOutput(cmd)
+        response = urllib2.urlopen('http://icanhazip.com')
+        ip = response.read()
+        ip = str(ip)
         
         return ip
     
