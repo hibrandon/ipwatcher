@@ -123,6 +123,7 @@ class WatchIpGui:
         self.scale = None
         self.stop = True
         
+        self.execWatchThread = None
         
         self.display()
         
