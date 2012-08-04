@@ -33,8 +33,8 @@ from utilities import *
 class EmailAfterExecGui():
     def __init__(self,master,title='Email After Execution'):
         
-        self.pathToExe =""
-        self.args = ""
+        self.pathToExe =StringVar()
+        self.args = StringVar()
         self.master = master
         self.menubar = Menu(self.master)
         self.title = title
@@ -90,16 +90,14 @@ class EmailAfterExecGui():
             self.showPrefs()
             
         else:
-            msg = 'Shall I minimize the window and execute ' + self.pathToExe + ' now?'
+            msg = 'Shall I minimize the window and execute ' + os.path.basename(self.pathToExe.get()) + ' now?'
             if tkMessageBox.askokcancel('Execute Confirmation', msg):
                 self.top.iconify()
                 try:
-                    self.pathToExe = self.ePath.get().strip()
-                    self.args = self.eArgs.get()
-                    text += self.captureOutput(self.pathToExe)
+                    text += self.captureOutput(self.pathToExe.get() + " " + self.args.get())
                     
                     
-                    subject = self.pathToExe + " <-- Command completed"
+                    subject = self.pathToExe.get() + " <-- Command completed"
                     
                     emObj = self.emailConfig
                      
@@ -152,8 +150,12 @@ class EmailAfterExecGui():
     def showPrefs(self): 
         self.emailConfig.display(self,self.preExec)
         self.top.withdraw()
+        
+    def browseForExe(self):
+        tmp = askopenfilename()
+        if tmp != "":
+            self.pathToExe.set(tmp)
 
-    
     def display(self, startExecution=False):
         self.startExecution = startExecution
          
@@ -211,7 +213,7 @@ class EmailAfterExecGui():
             self.ePath = Entry(self.top,width=35, textvariable=self.pathToExe)
             self.ePath.grid(row=7,column=1, pady=3, padx=5,sticky=W)
             
-            Button(self.top, text='+',bg='blue', fg='white', command=self.cancel).grid(row=7,column=2)
+            Button(self.top, text='+',bg='blue', fg='white', command=self.browseForExe).grid(row=7,column=2)
                                
             Label(self.top, text="Args",
                                bd=2,relief=SOLID,width=30).grid(row=8,sticky=W)
