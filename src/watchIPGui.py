@@ -45,6 +45,7 @@ class ExecuteWatchThread(threading.Thread):
         
         self.watch = WatchIP()
         
+        
         threading.Thread.__init__(self, name="WatchIP")
         
     def run(self):
@@ -63,7 +64,17 @@ class ExecuteWatchThread(threading.Thread):
             
             if self.watchedValueHasChanged():
                 print "Values have changed"
-                print self.watch.getCurrentIpString()
+                subject = "Watch Value Changed for NODE: " + self.watch.curHostName
+                text = self.watch.getCurrentIpString()
+
+                email = EmailWrapper(self.recipients,subject,text, self.fromAddress, self.password, self.server, self.port)   
+                email.mail()
+                
+                if not email.hasErrors:
+                    print "Email sent"
+                    
+                else:
+                    print email.errString
 
     def watchedValueHasChanged(self):
         notify = False
@@ -306,9 +317,9 @@ class WatchIpGui:
                         
                         self.normalizeInterval()
                         em = self.emailConfig
-                        self.execWatchThread = ExecuteWatchThread(self.scale, em.fromAddress,em.password,em.recipients,
+                        self.execWatchThread = ExecuteWatchThread(self.scale, em.fromAddress.get(),em.password.get(),em.recipients.get(),
                                                                    self.cbInternalIp.get(), self.cbExternalIp.get(),
-                                                                   self.cbHostname.get(), em.server, em.port)
+                                                                   self.cbHostname.get(), em.server.get(), em.port.get())
                         self.execWatchThread.start() 
                         
 #                        self.emailOnChange() 
@@ -322,7 +333,7 @@ class WatchIpGui:
                 self.execWatchThread.join()
                 
             print "She is gone"
-            print "Libving? ", self.execWatchThread.isAlive()
+            print "Living? ", self.execWatchThread.isAlive()
             
             
     def getNotificationList(self):

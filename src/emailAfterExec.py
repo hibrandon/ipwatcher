@@ -28,6 +28,7 @@ from ConfigParser import SafeConfigParser
 
 from emailWrapper import EmailWrapper
 from emailConfigGui import EmailConfigGui
+from utilities import *
 
 class EmailAfterExecGui():
     def __init__(self,master,title='Email After Execution'):
@@ -38,10 +39,18 @@ class EmailAfterExecGui():
         self.title = title
         self.newWindow = True 
         self.preExec = False
+        self.logDir = ""#'..' + os.sep + 'logs'
+        self.spacer = '*' * 80 + '\n'
+        self.spacer += self.spacer + '\n'
+        dateStamp = str(datetime.date.today()) + strftime("_%H%M%S")
+        self.errorLog = self.logDir + os.sep + 'emailAfterExec.' + str(dateStamp) + ".log"
+        writeLog(self.errorLog, "Starting EmailAfterExec on .... " + str(dateStamp) + "\n")
+        writeLog(self.errorLog, self.spacer)
         
-        self.emailConfig = EmailConfigGui(master, False)
         
-        if self.emailConfig.initialMissingConfigCheck() == True:
+        self.emailConfig = EmailConfigGui(master, False, self.errorLog)
+        
+        if self.emailConfig.checkMissingConfig() == True:
             message = "This is either the first time you have run this program "
             message += "or you are missing some required configuration"
             
@@ -50,6 +59,7 @@ class EmailAfterExecGui():
             
         else:
             self.display()
+            
         
        
     def cancel(self): 
@@ -79,42 +89,42 @@ class EmailAfterExecGui():
             self.showPrefs()
             
         else:
-            if self.startExecution == True:
-                msg = 'Shall I minimize the window and execute ' + self.pathToExe + ' now?'
-                if tkMessageBox.askokcancel('Execute Confirmation', msg):
-                    self.mainFrame.iconify()
-                    try:
-                        self.pathToExe = self.ePath.get().strip()
-                        self.args = self.eArgs.get()
-                        text += self.captureOutput(self.pathToExe)
-                        
-                        
-                        subject = self.pathToExe + " <-- Command completed"
-                        
-                        emObj = self.emailConfig
-                         
-                        email = EmailWrapper(emObj.recipients.get(),subject,text, emObj.fromAddress.get(), emObj.password.get())
-                        
-                        email.mail()
-                        
-                        if email.hasErrors == True:
-                            msg = email.errString
-                            msg += "\nValues: \n"
-                            msg +=  email.toString()
-                            tkMessageBox.showerror('Mail Error Generated', msg)
-                            self.mainFrame.deiconify()
-                            
-                        else:
-                            tkMessageBox.showinfo("Execution Complete", subject)
-                            self.mainFrame.deiconify()
-                        
-                    except Exception as inst:
-                        output = "ERROR GENERATED in EmailAfterExec.submit:\n"
-                        output += "Exception Type: " + str(type(inst)) + "\n"
-                        output += "Exception: " + str(inst) + "\n" 
-                        tkMessageBox.showerror('Submit Error Generated', output)
+            msg = 'Shall I minimize the window and execute ' + self.pathToExe + ' now?'
+            if tkMessageBox.askokcancel('Execute Confirmation', msg):
+                self.mainFrame.iconify()
+                try:
+                    self.pathToExe = self.ePath.get().strip()
+                    self.args = self.eArgs.get()
+                    text += self.captureOutput(self.pathToExe)
+                    
+                    
+                    subject = self.pathToExe + " <-- Command completed"
+                    
+                    emObj = self.emailConfig
+                     
+                    email = EmailWrapper(emObj.recipients.get(),subject,text, 
+                                         emObj.fromAddress.get(), emObj.password.get(), emObj.server.get(), emObj.port.get())
+                    
+                    email.mail()
+                    
+                    if email.hasErrors == True:
+                        msg = email.errString
+                        msg += "\nValues: \n"
+                        msg +=  email.toString()
+                        tkMessageBox.showerror('Mail Error Generated', msg)
                         self.mainFrame.deiconify()
-                
+                        
+                    else:
+                        tkMessageBox.showinfo("Execution Complete", subject)
+                        self.mainFrame.deiconify()
+                    
+                except Exception as inst:
+                    output = "ERROR GENERATED in EmailAfterExec.submit:\n"
+                    output += "Exception Type: " + str(type(inst)) + "\n"
+                    output += "Exception: " + str(inst) + "\n" 
+                    tkMessageBox.showerror('Submit Error Generated', output)
+                    self.mainFrame.deiconify()
+            
         
         
         
