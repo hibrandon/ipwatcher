@@ -36,6 +36,7 @@ class EmailAfterExecGui():
         self.pathToExe =""
         self.args = ""
         self.master = master
+        self.menubar = Menu(self.master)
         self.title = title
         self.newWindow = True 
         self.preExec = False
@@ -91,7 +92,7 @@ class EmailAfterExecGui():
         else:
             msg = 'Shall I minimize the window and execute ' + self.pathToExe + ' now?'
             if tkMessageBox.askokcancel('Execute Confirmation', msg):
-                self.mainFrame.iconify()
+                self.top.iconify()
                 try:
                     self.pathToExe = self.ePath.get().strip()
                     self.args = self.eArgs.get()
@@ -112,18 +113,18 @@ class EmailAfterExecGui():
                         msg += "\nValues: \n"
                         msg +=  email.toString()
                         tkMessageBox.showerror('Mail Error Generated', msg)
-                        self.mainFrame.deiconify()
+                        self.top.deiconify()
                         
                     else:
                         tkMessageBox.showinfo("Execution Complete", subject)
-                        self.mainFrame.deiconify()
+                        self.top.deiconify()
                     
                 except Exception as inst:
                     output = "ERROR GENERATED in EmailAfterExec.submit:\n"
                     output += "Exception Type: " + str(type(inst)) + "\n"
                     output += "Exception: " + str(inst) + "\n" 
                     tkMessageBox.showerror('Submit Error Generated', output)
-                    self.mainFrame.deiconify()
+                    self.top.deiconify()
             
         
         
@@ -150,15 +151,15 @@ class EmailAfterExecGui():
     
     def showPrefs(self): 
         self.emailConfig.display(self,self.preExec)
-        self.mainFrame.withdraw()
+        self.top.withdraw()
 
     
     def display(self, startExecution=False):
         self.startExecution = startExecution
          
         if self.newWindow == False:
-            self.mainFrame.update()
-            self.mainFrame.deiconify()
+            self.top.update()
+            self.top.deiconify()
             
             if self.startExecution == True:
                 self.submit()
@@ -166,54 +167,61 @@ class EmailAfterExecGui():
         
         else:
             ## Menu Bar
-            menubar = Menu(self.master)
-            filemenu = Menu(menubar, tearoff=0)
+           
+            filemenu = Menu(self.menubar, tearoff=0)
             filemenu.add_command(label="Execute", command=self.submit)
     
             filemenu.add_separator()
     
             filemenu.add_command(label="Exit", command=self.cancel)
-            menubar.add_cascade(label="File", menu=filemenu)
-            editmenu = Menu(menubar, tearoff=0)
+            self.menubar.add_cascade(label="File", menu=filemenu)
+            editmenu = Menu(self.menubar, tearoff=0)
     
             editmenu.add_separator()
     
             editmenu.add_command(label="Preferences", command=self.showPrefs)
     
-            menubar.add_cascade(label="Edit", menu=editmenu)
-            helpmenu = Menu(menubar, tearoff=0)
+            self.menubar.add_cascade(label="Edit", menu=editmenu)
+            helpmenu = Menu(self.menubar, tearoff=0)
             helpmenu.add_command(label="Email After Execution Help", command=self.helpButton)
             helpmenu.add_command(label="About...", command=self.showVersion)
-            menubar.add_cascade(label="Help", menu=helpmenu)
-            self.master.config(menu=menubar)
+            self.menubar.add_cascade(label="Help", menu=helpmenu)
+            self.master.config(menu=self.menubar)
             ## End Menu Bar
             
             
-            self.mainFrame = Toplevel(self.master)
-            self.mainFrame.title(self.title)
-            self.mainFrame.resizable(width=FALSE, height=FALSE)
-            self.mainFrame.protocol("WM_DELETE_WINDOW",self.cancel)
+            #self.top = Toplevel(self.master)
             
-            Label(self.mainFrame, text="Programs To Execute",
+            
+            
+            self.top = Toplevel(menu=self.menubar, width=500, relief=RAISED,
+                                borderwidth=2)
+            
+            self.top.protocol("WM_DELETE_WINDOW",self.cancel)
+            self.top.title(self.title)
+            self.top.resizable(width=FALSE, height=FALSE)
+            
+            
+            Label(self.top, text="Programs To Execute",
                                bd=2,relief=SOLID,width=60, bg='gray').grid(columnspan=2,row=6, pady=8)
                                
             
-            Label(self.mainFrame, text="Path",
+            Label(self.top, text="Path",
                                bd=2,relief=SOLID,width=30).grid(row=7,sticky=W)
-            self.ePath = Entry(self.mainFrame,width=35, textvariable=self.pathToExe)
+            self.ePath = Entry(self.top,width=35, textvariable=self.pathToExe)
             self.ePath.grid(row=7,column=1, pady=3, padx=5,sticky=W)
             
-            Button(self.mainFrame, text='+',bg='blue', fg='white', command=self.cancel).grid(row=7,column=2)
+            Button(self.top, text='+',bg='blue', fg='white', command=self.cancel).grid(row=7,column=2)
                                
-            Label(self.mainFrame, text="Args",
+            Label(self.top, text="Args",
                                bd=2,relief=SOLID,width=30).grid(row=8,sticky=W)
                                
-            self.eArgs = Entry(self.mainFrame,width=35, textvariable=self.args)
+            self.eArgs = Entry(self.top,width=35, textvariable=self.args)
             self.eArgs.grid(row=8,column=1, pady=3, padx=5,sticky=W)
             
-            Button(self.mainFrame, text='Help',bg='gray', fg='white', command=self.cancel).grid(row=9,column=0,pady=10)
-            Button(self.mainFrame, text='Submit',bg='blue', fg='white', command=self.submit).grid(row=9,column=1,pady=10)
-            Button(self.mainFrame, text='Quit',bg='red', fg='white', command=self.cancel).grid(row=9,column=2,pady=10)
+            Button(self.top, text='Help',bg='gray', fg='white', command=self.cancel).grid(row=9,column=0,pady=10)
+            Button(self.top, text='Submit',bg='blue', fg='white', command=self.submit).grid(row=9,column=1,pady=10)
+            Button(self.top, text='Quit',bg='red', fg='white', command=self.cancel).grid(row=9,column=2,pady=10)
             self.newWindow = False
     
 if __name__ == "__main__":
