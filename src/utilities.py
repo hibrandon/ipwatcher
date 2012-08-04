@@ -3,6 +3,7 @@ import os
 from Tkinter import *
 from datetime import date
 from time import strftime
+import base64
 
 
 
@@ -83,71 +84,72 @@ def captureOutput(cmd):
         
     return str(output) 
 
-def createPropertiesFile(filePath, parser, sectionDict):
-    success = True
-    output = ""
-    
-    try:        
-        for section in sectionDict.iterkeys():
-            parser.add_section(section)
-            
-            for option in sectionDict[section]:
-                parser.set(section,option,'')
-            
-            
-        with open (filePath, "w") as fOut:
-            parser.write(fOut)
-            
-    except Exception as e:
-        success = False
-        output = "ERROR GENERATED: utlitities.createPropertiesFile:\n"
-        output += "Exception Type: " + str(type(e)) + "\n"
-        output += "Exception: " + str(e) + "\n"
-    
-    return success,output    
-            
-def updateProperties(parser, propertiesFile, key, val, section='email'):
-    success = True
-    output = ""
-    try:
-        parser.set(section, key, val)
-        with open(propertiesFile, 'w') as fOut:
-            parser.write(fOut)
-            
-    except Exception as inst:
-        success = False
-        output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
-        output += "Exception Type: " + str(type(inst)) + "\n"
-        output += "Exception: " + str(inst) + "\n"
-    
-    return success, output
-
-def isPropertiesFileIntact(propertiesFile, parser, sectionDict):
-    intact = True
-    output = ""
-    
-    if os.path.exists(propertiesFile) == False:
-        intact = False
-        
-    else:
-        try:
-            for section in sectionDict.iterkeys():
-                if parser.has_section(section) == False:
-                    intact = False
-                    break;
-                else:
-                    for option in sectionDict[section]:
-                        if parser.has_option(section, option) == False:
-                            intact = False
-                            break;
-                        
-        except Exception as inst:
-            intact = False
-            output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
-            output += "Exception Type: " + str(type(inst)) + "\n"
-            output += "Exception: " + str(inst) + "\n"
-        
-    return intact, output
+#def createPropertiesFile(filePath, parser, sectionDict):
+#    success = True
+#    output = ""
+#    
+#    try:        
+#        for section in sectionDict.iterkeys():
+#            parser.add_section(section)
+#            
+#            for option in sectionDict[section]:
+#                parser.set(section,option,'')
+#            
+#            
+#        with open (filePath, "w") as fOut:
+#            parser.write(fOut)
+#            
+#    except Exception as e:
+#        success = False
+#        output = "ERROR GENERATED: utlitities.createPropertiesFile:\n"
+#        output += "Exception Type: " + str(type(e)) + "\n"
+#        output += "Exception: " + str(e) + "\n"
+#    
+#    return success,output    
+#            
+#def updateProperties(parser, propertiesFile, key, val, section='email'):
+#    success = True
+#    output = ""
+#    try:
+#        parser.set(section, key, val)
+#        with open(propertiesFile, 'w') as fOut:
+#            parser.write(fOut)
+#        print "Should have written it to file"
+#            
+#    except Exception as inst:
+#        success = False
+#        output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
+#        output += "Exception Type: " + str(type(inst)) + "\n"
+#        output += "Exception: " + str(inst) + "\n"
+#    
+#    return success, output
+#
+#def isPropertiesFileIntact(propertiesFile, parser, sectionDict):
+#    intact = True
+#    output = ""
+#    
+#    if os.path.exists(propertiesFile) == False:
+#        intact = False
+#        
+#    else:
+#        try:
+#            for section in sectionDict.iterkeys():
+#                if parser.has_section(section) == False:
+#                    intact = False
+#                    break;
+#                else:
+#                    for option in sectionDict[section]:
+#                        if parser.has_option(section, option) == False:
+#                            intact = False
+#                            break;
+#                        
+#        except Exception as inst:
+#            intact = False
+#            output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
+#            output += "Exception Type: " + str(type(inst)) + "\n"
+#            output += "Exception: " + str(inst) + "\n"
+#        
+#    return intact, output
                     
 def deleteFile(filePath):
     deleted = True
@@ -164,5 +166,25 @@ def deleteFile(filePath):
         
     return deleted, output
             
+obfcuscateCount = 5
+
+def obfuscateString(string):
+    """
+    This is not security or encryption but obfuscation.
+    """
+    obfuscatedString = string
+    
+    for i in range(obfcuscateCount):
+        obfuscatedString = base64.b64encode(obfuscatedString)
+        
+    return obfuscatedString
+
+def deObfuscateString(string):
+    
+    deObfuscatedString = string
+    for i in range(obfcuscateCount):
+        deObfuscatedString = base64.b64decode(deObfuscatedString)
+
+    return deObfuscatedString
     
     

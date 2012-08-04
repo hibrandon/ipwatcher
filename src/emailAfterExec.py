@@ -84,7 +84,7 @@ class EmailAfterExecGui():
             self.showPrefs()
             
                    
-        elif self.emailConfig.password.get() == "":
+        elif self.emailConfig.getPassword() == "":
             msg = "Enter your password, hit apply and then resubmit"
             tkMessageBox.showinfo('Authenticate', msg)
             self.showPrefs()
@@ -104,7 +104,7 @@ class EmailAfterExecGui():
                     emObj = self.emailConfig
                      
                     email = EmailWrapper(emObj.recipients.get(),subject,text, 
-                                         emObj.fromAddress.get(), emObj.password.get(), emObj.server.get(), emObj.port.get())
+                                         emObj.fromAddress.get(), emObj.getPassword(),emObj.server.get(),emObj.port.get())
                     
                     email.mail()
                     
@@ -119,7 +119,7 @@ class EmailAfterExecGui():
                         tkMessageBox.showinfo("Execution Complete", subject)
                         self.top.deiconify()
                     
-                except Exception as inst:
+                except IOError as inst:
                     output = "ERROR GENERATED in EmailAfterExec.submit:\n"
                     output += "Exception Type: " + str(type(inst)) + "\n"
                     output += "Exception: " + str(inst) + "\n" 

@@ -56,7 +56,7 @@ class EmailConfigGui():
         self.newWindow = True
         
         # Create the properties file if it doesn't exist
-        propertiesFileIntact, errString = isPropertiesFileIntact(self.properties, self.parser, self.sectionsDict)
+        propertiesFileIntact, errString = self.isPropertiesFileIntact(self.properties, self.parser, self.sectionsDict)
         
         if propertiesFileIntact == False:
             writeLog(self.errorLog, errString)
@@ -65,7 +65,7 @@ class EmailConfigGui():
             if not deleted:
                 writeLog(self.errorLog, errString)
                 
-            success, errString = createPropertiesFile(self.properties, self.parser, self.sectionsDict)
+            success, errString = self.createPropertiesFile(self.properties, self.parser, self.sectionsDict)
             
             if success == False:
                 writeLog(self.errorLog, errString)
@@ -109,19 +109,21 @@ class EmailConfigGui():
             
         return val
         
-    def apply(self):
-        
-        updateProperties(self.parser, self.properties, 'from', self.fromAddress.get().strip())
-        updateProperties(self.parser, self.properties, 'to',self.recipients.get().strip())
-        updateProperties(self.parser, self.properties, 'port',self.port.get().strip())
-        updateProperties(self.parser, self.properties, 'server',self.server.get().strip())
+    def apply(self):  
+        #grab temp params and obfuscate password
+        self.getCurrentParameters()
+              
+        self.updateProperties(self.parser, self.properties, 'from', self.tmpFromAddress)        
+        self.updateProperties(self.parser, self.properties, 'to',self.tmpRecipient)
+        self.updateProperties(self.parser, self.properties, 'port',self.tmpPort)
+        self.updateProperties(self.parser, self.properties, 'server',self.tmpServer)
         
         if self.savePassword.get() == True:
             msg = "The password though obfuscated will be saved in an insecure manner."
             msg += "This is not recommended.  Are you sure you wish to do this?"
             if tkMessageBox.askyesno('Dangerous Action', msg ):
                 
-                self.updateProperties(self.parser, 'password', self.password.get().strip())
+                self.updateProperties(self.parser,self.properties, 'password', self.tmpPassword)
 
         tkMessageBox.showinfo('Changes Applied', 'Your changes have been applied.')
         self.cancel()
@@ -135,35 +137,7 @@ class EmailConfigGui():
             self.running = False
             if self.parentWindow != None:
                 self.mainFrame.withdraw()
-                self.parentWindow.display(self.preExecution)
-             
-            
-            
-#    def updateProperties(self,parser, properties, key, val, section='email'):
-#        try:
-#            parser.set(section, key, val)
-#            with open(properties, 'w') as fOut:
-#                parser.write(fOut)
-#                
-#        except Exception as inst:
-#            output = "ERROR GENERATED in UpdateProperties:\n"
-#            output += "Exception Type: " + str(type(inst)) + "\n"
-#            output += "Exception: " + str(inst) + "\n"
-#            print output
-#            
-#    def createPropertiesFile(self, fileName, parser, sectionDict):
-#        try:
-#            for section, values in sectionDict.items():
-#                
-#            with file(fileName, "w") as fOut:
-#                self.parser.write(fOut)
-#                
-#        except IOError as e:
-#            output = "ERROR GENERATED EmailConfigGUI.init:\n"
-#            output += "Exception Type: " + str(type(e)) + "\n"
-#            output += "Exception: " + str(e) + "\n"
-#            print output
-#        
+                self.parentWindow.display(self.preExecution) 
         
          
     def checkMissingConfig(self):
@@ -258,7 +232,11 @@ class EmailConfigGui():
             self.newWindow = False
             
     def getCurrentParameters(self):
-        self.tmpPassword = self.password.get().strip()
+        
+        self.obsPassword = self.password.get().strip()
+        self.obsPassword = obfuscateString(self.obsPassword)
+        
+        self.tmpPassword = self.obsPassword
         self.tmpFromAddress = self.fromAddress.get().strip()
         self.tmpPort = self.port.get().strip()
         self.tmpServer = self.server.get().strip()
@@ -286,6 +264,11 @@ class EmailConfigGui():
             self.missingTempParam = True
             
         return self.missingTempParam
+    
+    def getPassword(self):
+        obsPassword = self.password.get().strip()
+        obsPassword = obfuscateString(obsPassword)
+        return obsPassword
         
         
     def testConfiguration(self):
@@ -309,11 +292,84 @@ class EmailConfigGui():
                 tkMessageBox.showinfo('Test Completed Successfully', 'You should receive an email with the subject --> ' + subject)
                 
 
-    
-            
+    def createPropertiesFile(self, filePath, parser, sectionDict):
+        success = True
+        output = ""
         
+        try:        
+            for section in sectionDict.iterkeys():
+                parser.add_section(section)
+                
+                for option in sectionDict[section]:
+                    parser.set(section,option,'')
+                
+                
+            with open (filePath, "w") as fOut:
+                parser.write(fOut)
+                
+        except Exception as e:
+            success = False
+            output = "ERROR GENERATED: EmailConfigGUi.createPropertiesFile:\n"
+            output += "Exception Type: " + str(type(e)) + "\n"
+            output += "Exception: " + str(e) + "\n"
+            
+            print output
+        
+        return success,output    
+                
+    def updateProperties(self, parser, propertiesFile, key, val, section='email'):
+        success = True
+        output = ""
+
+        try:
+            parser.set(section, key, val)
+            
+            with open(propertiesFile, 'w') as fOut:
+                parser.write(fOut)
+
+                
+        except Exception as inst:
+            success = False
+            output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
+            output += "Exception Type: " + str(type(inst)) + "\n"
+            output += "Exception: " + str(inst) + "\n"
+            
+            print output
+
+        return success, output
+    
+    def isPropertiesFileIntact(self, propertiesFile, parser, sectionDict):
+        intact = True
+        output = ""
+        
+        if os.path.exists(propertiesFile) == False:
+            intact = False
+            
+        else:
+            try:
+                for section in sectionDict.iterkeys():
+                    if parser.has_section(section) == False:
+                        intact = False
+                        break;
+                    else:
+                        for option in sectionDict[section]:
+                            if parser.has_option(section, option) == False:
+                                intact = False
+                                break;
+                            
+            except Exception as inst:
+                intact = False
+                output = "ERROR GENERATED in EmailConfigGui.isPropertiesFileIntact:\n"
+                output += "Exception Type: " + str(type(inst)) + "\n"
+                output += "Exception: " + str(inst) + "\n"
+                
+        print output
+            
+        return intact, output
+            
+    
 if __name__ == "__main__":
     root = Tk()
     root.withdraw()
-    emailConf = EmailConfigGui(root, True, True)
+    emailConf = EmailConfigGui(root, True, "", True)
     root.mainloop()

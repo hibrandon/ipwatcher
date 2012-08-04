@@ -22,6 +22,7 @@ from email.MIMEText import MIMEText
 from email import Encoders
 import os
 import getpass
+from utilities import *
 
 
 
@@ -69,16 +70,21 @@ class EmailWrapper:
             mailServer.starttls()
             mailServer.ehlo()
             
-            mailServer.login(self.fromAddress, self.passwd)
+            #Assumes the password is obfuscated
+            
+            tmp = deObfuscateString(self.passwd)
+            mailServer.login(self.fromAddress, tmp)
             mailServer.sendmail(self.fromAddress, msg.get_all(('To')), msg.as_string())
             # Should be mailServer.quit(), but that crashes...
             
         except smtplib.SMTPAuthenticationError as inst:
-            output = "ERROR GENERATED:\n"
+            output = "ERROR GENERATED: EmailWrapper.Mail\n"
             output += "Exception Type: " + str(type(inst)) + "\n"
             output += "Exception: " + str(inst) + "\n"
             self.errString += output + '\n' 
             self.hasErrors = True
+            print self.errString
+
             
         except Exception as inst:
             output = "ERROR GENERATED:\n"
@@ -86,7 +92,8 @@ class EmailWrapper:
             output += "Exception: " + str(inst) + "\n"
             self.errString += output + '\n' 
             self.hasErrors = True
-        
+            print self.errString
+            
         finally:
             mailServer.close()
             

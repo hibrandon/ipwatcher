@@ -294,9 +294,9 @@ class WatchIpGui:
                 tkMessageBox.showinfo('Configure Email', msg)
                 self.showPrefs()
                    
-            elif self.emailConfig.password.get() == "":
+            elif self.emailConfig.getPassword() == "":
                 self.preExec = True
-                msg = "Enter your password, hit apply and then Start"
+                msg = "Enter your password to start watching."
                 tkMessageBox.showinfo('Authenticate', msg)
                 self.showPrefs()
                 
@@ -317,7 +317,7 @@ class WatchIpGui:
                         
                         self.normalizeInterval()
                         em = self.emailConfig
-                        self.execWatchThread = ExecuteWatchThread(self.scale, em.fromAddress.get(),em.password.get(),em.recipients.get(),
+                        self.execWatchThread = ExecuteWatchThread(self.scale, em.fromAddress.get(),em.getPassword(),em.recipients.get(),
                                                                    self.cbInternalIp.get(), self.cbExternalIp.get(),
                                                                    self.cbHostname.get(), em.server.get(), em.port.get())
                         self.execWatchThread.start() 
