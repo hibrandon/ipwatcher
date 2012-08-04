@@ -42,6 +42,7 @@ class ExecuteWatchThread(threading.Thread):
         self.watchInternalIP = watchInternalIP
         self.watchExternalIP = watchExternalIP
         self.watchHostname = watchHostname
+        self.execWatchThread = None
         
         self.watch = WatchIP()
         
@@ -281,7 +282,10 @@ class WatchIpGui:
         pass
 
     def quit(self): 
-        #tkMessageBox.showinfo("Cheers", "Have a good one :) " )
+        if self.execWatchThread != None:
+            if self.execWatchThread.isAlive():
+                self.execWatchThread.join()
+                
         os.sys.exit(0)
         
     def action(self):
