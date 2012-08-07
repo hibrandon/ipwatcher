@@ -47,6 +47,7 @@ class EmailConfigGui():
         
         
         
+        
         self.properties = os.getenv("HOME") + os.sep + properties
 
         self.isMain = isMain
@@ -126,6 +127,7 @@ class EmailConfigGui():
                 self.updateProperties(self.parser,self.properties, 'password', self.tmpPassword)
 
         tkMessageBox.showinfo('Changes Applied', 'Your changes have been applied.')
+        self.applied = True
         self.cancel()
         
     
@@ -135,6 +137,9 @@ class EmailConfigGui():
             os.sys.exit(0)
         else:
             self.running = False
+            if self.applied == False:
+                self.preExecution = False
+                
             if self.parentWindow != None:
                 self.mainFrame.withdraw()
                 self.parentWindow.display(self.preExecution) 
@@ -164,6 +169,7 @@ class EmailConfigGui():
             
     def display(self, parentWindow=None, preExecution=False):
         self.preExecution = preExecution
+        self.applied = False
         
         if self.newWindow == False:
             self.mainFrame.update()
