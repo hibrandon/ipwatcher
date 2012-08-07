@@ -163,7 +163,7 @@ class WatchIpGui:
     
             self.menubar.add_cascade(label="Edit", menu=editmenu)
             helpmenu = Menu(self.menubar, tearoff=0)
-            helpmenu.add_command(label="Email After Execution Help", command=self.helpButton)
+            helpmenu.add_command(label="IP Watchdog Help", command=self.helpButton)
             helpmenu.add_command(label="About...", command=self.showVersion)
             self.menubar.add_cascade(label="Help", menu=helpmenu)
             self.master.config(menu=self.menubar)
