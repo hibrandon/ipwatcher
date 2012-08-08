@@ -50,8 +50,6 @@ class ExecuteWatchThread(threading.Thread):
         threading.Thread.__init__(self, name="WatchIP")
         
     def run(self):
-        print "Running the thread"
-        print "Interval == ", self.interval
         
         while not self._stopEvent.isSet():
             remainingTime = 30 #self.interval
@@ -66,8 +64,11 @@ class ExecuteWatchThread(threading.Thread):
             if self.watchedValueHasChanged():
                 print "Values have changed"
                 subject = "Watch Value Changed for NODE: " + self.watch.curHostName
-                text = self.watch.getCurrentIpString()
-
+                text = self.watch.getCurrentIpString() + "\n" + self.watch.getPreviousValuesStrings()
+                self.watch.updatePropertiesFile()
+                self.watch.getPreviousIP()
+                print self.watch.getPreviousValuesStrings()
+                
                 email = EmailWrapper(self.recipients,subject,text, self.fromAddress, self.password, self.server, self.port)   
                 email.mail()
                 
@@ -76,10 +77,13 @@ class ExecuteWatchThread(threading.Thread):
                     
                 else:
                     print email.errString
+            else:
+                print "No change to a watched value... Nothing updated\n"
 
     def watchedValueHasChanged(self):
+        print "Checking watched values ............."
         notify = False
-        self.watch.updateOnChangeInIpOrHost()
+        self.watch.checkForChangeInIpOrHost()
     
         if self.watchExternalIP == True:
             if self.watch.externalIpHasChanged == True:
@@ -91,8 +95,8 @@ class ExecuteWatchThread(threading.Thread):
                 
         if self.watchHostname == True:
             if self.watch.hostHasChanged == True:
-                notify = True
-                
+                notify = True       
+            
         return notify       
                 
     def join(self, timeout=None):

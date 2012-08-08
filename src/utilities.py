@@ -84,28 +84,32 @@ def captureOutput(cmd):
         
     return str(output) 
 
-#def createPropertiesFile(filePath, parser, sectionDict):
-#    success = True
-#    output = ""
-#    
-#    try:        
-#        for section in sectionDict.iterkeys():
-#            parser.add_section(section)
-#            
-#            for option in sectionDict[section]:
-#                parser.set(section,option,'')
-#            
-#            
-#        with open (filePath, "w") as fOut:
-#            parser.write(fOut)
-#            
-#    except Exception as e:
-#        success = False
-#        output = "ERROR GENERATED: utlitities.createPropertiesFile:\n"
-#        output += "Exception Type: " + str(type(e)) + "\n"
-#        output += "Exception: " + str(e) + "\n"
-#    
-#    return success,output    
+def createPropertiesFile(filePath, parser, sectionDict):
+    success = True
+    output = ""
+    
+    try:        
+        for section in sectionDict.iterkeys():
+            parser.add_section(section)
+            
+            for option in sectionDict[section]:
+                parser.set(section,option,'')
+            
+            
+        with open (filePath, "w+") as fOut:
+            parser.write(fOut)
+            
+        print "Created the properies file --> " + filePath
+            
+    except Exception as e:
+        success = False
+        output = "ERROR GENERATED: utlitities.createPropertiesFile:\n"
+        output += "Exception Type: " + str(type(e)) + "\n"
+        output += "Exception: " + str(e) + "\n"
+        
+    print output
+    
+    return success,output    
 #            
 #def updateProperties(parser, propertiesFile, key, val, section='email'):
 #    success = True
@@ -187,4 +191,6 @@ def deObfuscateString(string):
 
     return deObfuscatedString
     
+def setupPropertiesFilePath(fileName):
+    pass
     
