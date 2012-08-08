@@ -1,8 +1,11 @@
 *.pyc
 *.pyo
+*.app/
+*.exe
 .project
 .pydevproject
 .*properties*
 conf/properties.conf
 build/
 dist/
+.DS_Store
