@@ -14,7 +14,7 @@ Applications folder.
 
 Installation (Windows)
 ======================
-TBD
+Download the .zip file.  Extract into a directory of your choice.  Change into the directory extracted.  Run the exe
  
 
 
