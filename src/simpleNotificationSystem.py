@@ -30,8 +30,8 @@ from emailWrapper import EmailWrapper
 from emailConfigGui import EmailConfigGui
 from utilities import *
 
-class EmailAfterExecGui():
-    def __init__(self,master,title='Email After Execution'):
+class SimpleNotificationSystem():
+    def __init__(self,master,title='Simple Notification System (SNS)'):
         
         self.pathToExe =StringVar()
         self.args = StringVar()
@@ -44,8 +44,8 @@ class EmailAfterExecGui():
         self.spacer = '*' * 80 + '\n'
         self.spacer += self.spacer + '\n'
         dateStamp = str(datetime.date.today()) + strftime("_%H%M%S")
-        self.errorLog = self.logDir + os.sep + 'emailAfterExec.' + str(dateStamp) + ".log"
-        writeLog(self.errorLog, "Starting EmailAfterExec on .... " + str(dateStamp) + "\n")
+        self.errorLog = self.logDir + os.sep + 'SNS.' + str(dateStamp) + ".log"
+        writeLog(self.errorLog, "Starting SNS on .... " + str(dateStamp) + "\n")
         writeLog(self.errorLog, self.spacer)
         
         
@@ -229,6 +229,6 @@ class EmailAfterExecGui():
 if __name__ == "__main__":
     root = Tk()
     root.withdraw()
-    emailExec = EmailAfterExecGui(root)
+    emailExec = SimpleNotificationSystem(root)
     root.mainloop()
         

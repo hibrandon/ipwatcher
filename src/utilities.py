@@ -110,50 +110,52 @@ def createPropertiesFile(filePath, parser, sectionDict):
     print output
     
     return success,output    
-#            
-#def updateProperties(parser, propertiesFile, key, val, section='email'):
-#    success = True
-#    output = ""
-#    try:
-#        parser.set(section, key, val)
-#        with open(propertiesFile, 'w') as fOut:
-#            parser.write(fOut)
-#        print "Should have written it to file"
-#            
-#    except Exception as inst:
-#        success = False
-#        output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
-#        output += "Exception Type: " + str(type(inst)) + "\n"
-#        output += "Exception: " + str(inst) + "\n"
-#    
-#    return success, output
-#
-#def isPropertiesFileIntact(propertiesFile, parser, sectionDict):
-#    intact = True
-#    output = ""
-#    
-#    if os.path.exists(propertiesFile) == False:
-#        intact = False
-#        
-#    else:
-#        try:
-#            for section in sectionDict.iterkeys():
-#                if parser.has_section(section) == False:
-#                    intact = False
-#                    break;
-#                else:
-#                    for option in sectionDict[section]:
-#                        if parser.has_option(section, option) == False:
-#                            intact = False
-#                            break;
-#                        
-#        except Exception as inst:
-#            intact = False
-#            output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
-#            output += "Exception Type: " + str(type(inst)) + "\n"
-#            output += "Exception: " + str(inst) + "\n"
-#        
-#    return intact, output
+            
+def updateProperties(parser, propertiesFile, key, val, section='email'):
+    success = True
+    output = ""
+    try:
+        parser.set(section, key, val)
+        with open(propertiesFile, 'w') as fOut:
+            parser.write(fOut)
+            
+    except Exception as inst:
+        success = False
+        output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
+        output += "Exception Type: " + str(type(inst)) + "\n"
+        output += "Exception: " + str(inst) + "\n"
+        print output
+    
+    return success, output
+
+def isPropertiesFileIntact(propertiesFile, parser, sectionDict):
+    intact = True
+    output = ""
+    
+    if os.path.exists(propertiesFile) == False:
+        intact = False
+        print propertiesFile + " <-- does not exist."
+        
+    else:
+        try:
+            for section in sectionDict.iterkeys():
+                if parser.has_section(section) == False:
+                    intact = False
+                    break;
+                else:
+                    for option in sectionDict[section]:
+                        if parser.has_option(section, option) == False:
+                            intact = False
+                            break;
+                        
+        except Exception as inst:
+            intact = False
+            output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
+            output += "Exception Type: " + str(type(inst)) + "\n"
+            output += "Exception: " + str(inst) + "\n"
+            print output
+        
+    return intact, output
                     
 def deleteFile(filePath):
     deleted = True
@@ -167,6 +169,7 @@ def deleteFile(filePath):
         output = "ERROR GENERATED in Utilities.UpdateProperties:\n"
         output += "Exception Type: " + str(type(inst)) + "\n"
         output += "Exception: " + str(inst) + "\n"
+        print output
         
     return deleted, output
             
@@ -192,5 +195,23 @@ def deObfuscateString(string):
     return deObfuscatedString
     
 def setupPropertiesFilePath(fileName):
-    pass
+    """
+    This function was created for compiling on Windows.  CX_Freeze throws and error because
+    it returns none on the os.getenv("HOME") call
+    
+    """
+    propertiesFile = ""
+    try:
+        propertiesFile = os.getenv("HOME") + os.sep + fileName
+        
+        
+    except Exception as inst:
+        propertiesFile = fileName
+        output = "ERROR GENERATED in Utilities.setupPropertiesFilePath:\n"
+        output += "Exception Type: " + str(type(inst)) + "\n"
+        output += "Exception: " + str(inst) + "\n"
+        print output
+        
+    return propertiesFile
+        
     

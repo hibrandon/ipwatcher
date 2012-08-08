@@ -25,7 +25,7 @@ from utilities import *
 
 class WatchIP:
     def __init__(self):
-        self.properties = os.getenv("HOME") + os.sep + '.ipwatcher.properties'
+        self.properties = '.ipwatcher.properties'
         self.prevHostName = ""
         self.prevInternalIp = ""
         self.prevExternalIp = ""
@@ -39,6 +39,9 @@ class WatchIP:
         self.internalIpHasChanged = False
         self.initialRun = True
         self.sectionDict = {'node':['user','internalIp','externalIp','hostname' ]}
+        
+        #setup properties file
+        self.properties = setupPropertiesFilePath(self.properties)
 
 
         self.parser = SafeConfigParser()
@@ -55,24 +58,20 @@ class WatchIP:
         # Create the properties file if it doesn't exist
         if os.path.exists(self.properties) == False:
             createPropertiesFile(self.properties, self.parser, self.sectionDict)
-            
-#            self.parser.add_section('node')
-#            with file(self.properties, "w+") as fOut:
-#                self.parser.write(fOut)
         
         self.getPreviousIP()
         self.getCurrentIP()
         
-        self.updateProperties(self.parser, self.properties, 'user', self.user)
+        updateProperties(self.parser, self.properties, 'user', self.user, 'node')
         
         if self.prevInternalIp == "":
-            self.updateProperties(self.parser, self.properties, 'internalIp', self.curInternalIp)
+            updateProperties(self.parser, self.properties, 'internalIp', self.curInternalIp, 'node')
         
         if self.prevExternalIp == "":
-            self.updateProperties(self.parser, self.properties, 'externalIp', self.curExternalIp)
+            updateProperties(self.parser, self.properties, 'externalIp', self.curExternalIp, 'node')
 
         if self.prevHostName == "":
-            self.updateProperties(self.parser, self.properties, 'hostname', self.curHostName)
+            updateProperties(self.parser, self.properties, 'hostname', self.curHostName, 'node')
         
     
     def getPreviousIP(self):
@@ -119,19 +118,6 @@ class WatchIP:
         
         return preVals    
         
-    def updateProperties(self,parser, properties, key, val, section='node'):
-        try:
-            parser.set(section, key, val)
-            
-            with open(properties, 'w') as fOut:
-                parser.write(fOut)
-                
-        except Exception as inst:
-            output = "ERROR GENERATED in UpdateProperties:\n"
-            output += "Exception Type: " + str(type(inst)) + "\n"
-            output += "Exception: " + str(inst) + "\n"
-            print output
-            
         
     def checkForChangeInIpOrHost(self):
        
@@ -158,9 +144,9 @@ class WatchIP:
         return self.hasChanged
     
     def updatePropertiesFile(self):
-        self.updateProperties(self.parser, self.properties, 'externalIp',self.curExternalIp)
-        self.updateProperties(self.parser,self.properties, 'internalIp',self.curInternalIp)  
-        self.updateProperties(self.parser, self.properties, 'hostname',self.curHostName)   
+        updateProperties(self.parser, self.properties, 'externalIp',self.curExternalIp, 'node')
+        updateProperties(self.parser,self.properties, 'internalIp',self.curInternalIp, 'node')  
+        updateProperties(self.parser, self.properties, 'hostname',self.curHostName, 'node')   
         
 if __name__ == "__main__":
     watch = WatchIP()

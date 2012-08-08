@@ -67,7 +67,6 @@ class ExecuteWatchThread(threading.Thread):
                 text = self.watch.getCurrentIpString() + "\n" + self.watch.getPreviousValuesStrings()
                 self.watch.updatePropertiesFile()
                 self.watch.getPreviousIP()
-                print self.watch.getPreviousValuesStrings()
                 
                 email = EmailWrapper(self.recipients,subject,text, self.fromAddress, self.password, self.server, self.port)   
                 email.mail()
